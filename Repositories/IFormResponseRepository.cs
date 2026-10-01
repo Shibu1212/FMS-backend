@@ -1,4 +1,5 @@
-﻿using FormManagementSystem.Models;
+﻿using FormManagementSystem.DTOs.Common;
+using FormManagementSystem.Models;
 
 namespace FormManagementSystem.Repositories;
 
@@ -8,11 +9,13 @@ public interface IFormResponseRepository
 
     Task<FormResponse?> GetByIdAsync(int id);
 
-    Task<List<FormResponse>> GetByUserIdAsync(int userId);
+    Task<(IEnumerable<FormResponse> Items, int TotalCount)> GetByUserIdAsync(
+    int userId,
+    PaginationRequestDto request);
 
-    Task<List<FormResponse>> GetByFormIdAsync(
-    int formId,
-    string? search = null);
+    Task<(IEnumerable<FormResponse> Items, int TotalCount)> GetByFormIdAsync(
+        int formId,
+        PaginationRequestDto request);
     Task<bool> ExistsByFormAndUserAsync(int formId, int userId);
     
 }

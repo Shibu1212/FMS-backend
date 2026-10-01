@@ -484,3 +484,6 @@ $RECYCLE.BIN/
 # Application secrets
 appsettings.json
 appsettings.Development.json
+
+# Uploaded user files
+wwwroot/uploads/

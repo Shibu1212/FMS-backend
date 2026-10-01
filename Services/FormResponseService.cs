@@ -1,4 +1,5 @@
 ﻿using FormManagementSystem.DTOs.FormResponse;
+using FormManagementSystem.DTOs.Common;
 using FormManagementSystem.Models;
 using FormManagementSystem.Repositories;
 
@@ -111,32 +112,48 @@ public class FormResponseService : IFormResponseService
         return MapToResponseDto(response);
     }
 
-    public async Task<List<FormResponseResponseDto>> GetByUserIdAsync(
-        int userId)
+    public async Task<PaginatedResponseDto<FormResponseResponseDto>> GetByUserIdAsync(
+    int userId,
+    PaginationRequestDto request)
     {
-        var responses =
-            await _formResponseRepository.GetByUserIdAsync(userId);
+        var result =
+            await _formResponseRepository.GetByUserIdAsync(
+                userId,
+                request);
 
-        return responses
-            .Select(MapToResponseDto)
-            .ToList();
+        var page = Math.Max(request.Page, 1);
+        var pageSize = Math.Clamp(request.PageSize, 1, 100);
+
+        return new PaginatedResponseDto<FormResponseResponseDto>
+        {
+            Items = result.Items.Select(MapToResponseDto).ToList(),
+            Page = page,
+            PageSize = pageSize,
+            TotalCount = result.TotalCount
+        };
     }
 
-    public async Task<List<FormResponseResponseDto>> GetByFormIdAsync(
+    public async Task<PaginatedResponseDto<FormResponseResponseDto>> GetByFormIdAsync(
     int formId,
-    string? search = null)
+    PaginationRequestDto request)
     {
-        var responses =
+        var result =
             await _formResponseRepository.GetByFormIdAsync(
                 formId,
-                search);
+                request);
 
-        return responses
-            .Select(MapToResponseDto)
-            .ToList();
+        var page = Math.Max(request.Page, 1);
+        var pageSize = Math.Clamp(request.PageSize, 1, 100);
+
+        return new PaginatedResponseDto<FormResponseResponseDto>
+        {
+            Items = result.Items.Select(MapToResponseDto).ToList(),
+            Page = page,
+            PageSize = pageSize,
+            TotalCount = result.TotalCount
+        };
     }
 
-    
 
     private FormResponseResponseDto MapToResponseDto(
         FormResponse response)

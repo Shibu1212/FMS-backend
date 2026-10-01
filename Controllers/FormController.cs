@@ -1,4 +1,5 @@
 ﻿using FormManagementSystem.DTOs.Forms;
+using FormManagementSystem.DTOs.Common;
 using FormManagementSystem.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -43,9 +44,10 @@ public class FormController : ControllerBase
 
     [HttpGet]
     [Authorize(Roles = "ADMIN,FORM_CREATOR")]
-    public async Task<IActionResult> GetAll()
+    public async Task<IActionResult> GetAll(
+    [FromQuery] PaginationRequestDto request)
     {
-        var forms = await _formService.GetAllAsync();
+        var forms = await _formService.GetAllAsync(request);
 
         return Ok(forms);
     }
@@ -133,9 +135,11 @@ public class FormController : ControllerBase
 
     [HttpGet("published")]
     [Authorize(Roles = "FORM_VIEWER")]
-    public async Task<IActionResult> GetPublished()
+    public async Task<IActionResult> GetPublished(
+    [FromQuery] PaginationRequestDto request)
     {
-        var forms = await _formService.GetPublishedAsync();
+        var forms =
+            await _formService.GetPublishedAsync(request);
 
         return Ok(forms);
     }

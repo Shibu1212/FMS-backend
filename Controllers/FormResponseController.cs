@@ -1,4 +1,5 @@
 ﻿using FormManagementSystem.DTOs.FormResponse;
+using FormManagementSystem.DTOs.Common;
 using FormManagementSystem.Extensions;
 using FormManagementSystem.Services;
 using Microsoft.AspNetCore.Authorization;
@@ -74,7 +75,8 @@ public class FormResponseController : ControllerBase
 
     [HttpGet("my")]
     [Authorize(Roles = "FORM_VIEWER")]
-    public async Task<IActionResult> GetMyResponses()
+    public async Task<IActionResult> GetMyResponses(
+    [FromQuery] PaginationRequestDto request)
     {
         var userId = await GetCurrentUserIdAsync();
 
@@ -85,7 +87,8 @@ public class FormResponseController : ControllerBase
 
         var responses =
             await _formResponseService.GetByUserIdAsync(
-                currentUserId);
+                currentUserId,
+                request);
 
         return Ok(responses);
     }
@@ -126,13 +129,13 @@ public class FormResponseController : ControllerBase
     [HttpGet("form/{formId:int}")]
     [Authorize(Roles = "ADMIN")]
     public async Task<IActionResult> GetByFormId(
-        int formId,
-        [FromQuery] string? search = null)
+    int formId,
+    [FromQuery] PaginationRequestDto request)
     {
         var responses =
             await _formResponseService.GetByFormIdAsync(
                 formId,
-                search);
+                request);
 
         return Ok(responses);
     }

@@ -1,6 +1,7 @@
 ﻿using FormManagementSystem.Data;
 using FormManagementSystem.Models;
 using Microsoft.EntityFrameworkCore;
+using FormManagementSystem.DTOs.Common;
 
 namespace FormManagementSystem.Repositories;
 
@@ -22,19 +23,95 @@ public class FormRepository : IFormRepository
         return form;
     }
 
-    public async Task<IEnumerable<Form>> GetAllAsync()
+    public async Task<(IEnumerable<Form> Items, int TotalCount)> GetAllAsync(
+    PaginationRequestDto request)
     {
-        return await _context.Forms
+        var query = _context.Forms
             .AsNoTracking()
+            .AsQueryable();
+
+        if (!string.IsNullOrWhiteSpace(request.Search))
+        {
+            var search = request.Search.Trim();
+
+            query = query.Where(f =>
+                f.Name.Contains(search) ||
+                (f.Description != null &&
+                 f.Description.Contains(search)));
+        }
+
+        query = request.SortBy?.ToLower() switch
+        {
+            "name" => request.SortOrder.ToLower() == "asc"
+                ? query.OrderBy(f => f.Name)
+                : query.OrderByDescending(f => f.Name),
+
+            "status" => request.SortOrder.ToLower() == "asc"
+                ? query.OrderBy(f => f.Status)
+                : query.OrderByDescending(f => f.Status),
+
+            "createdat" => request.SortOrder.ToLower() == "asc"
+                ? query.OrderBy(f => f.CreatedAt)
+                : query.OrderByDescending(f => f.CreatedAt),
+
+            _ => query.OrderByDescending(f => f.CreatedAt)
+        };
+
+        var totalCount = await query.CountAsync();
+
+        var page = Math.Max(request.Page, 1);
+        var pageSize = Math.Clamp(request.PageSize, 1, 100);
+
+        var items = await query
+            .Skip((page - 1) * pageSize)
+            .Take(pageSize)
             .ToListAsync();
+
+        return (items, totalCount);
     }
 
-    public async Task<IEnumerable<Form>> GetPublishedAsync()
+    public async Task<(IEnumerable<Form> Items, int TotalCount)> GetPublishedAsync(
+    PaginationRequestDto request)
     {
-        return await _context.Forms
-            .Where(f => f.Status == Models.FormStatus.PUBLISHED)
+        var query = _context.Forms
+            .Where(f => f.Status == FormStatus.PUBLISHED)
             .AsNoTracking()
+            .AsQueryable();
+
+        if (!string.IsNullOrWhiteSpace(request.Search))
+        {
+            var search = request.Search.Trim();
+
+            query = query.Where(f =>
+                f.Name.Contains(search) ||
+                (f.Description != null &&
+                 f.Description.Contains(search)));
+        }
+
+        query = request.SortBy?.ToLower() switch
+        {
+            "name" => request.SortOrder.ToLower() == "asc"
+                ? query.OrderBy(f => f.Name)
+                : query.OrderByDescending(f => f.Name),
+
+            "createdat" => request.SortOrder.ToLower() == "asc"
+                ? query.OrderBy(f => f.CreatedAt)
+                : query.OrderByDescending(f => f.CreatedAt),
+
+            _ => query.OrderByDescending(f => f.CreatedAt)
+        };
+
+        var totalCount = await query.CountAsync();
+
+        var page = Math.Max(request.Page, 1);
+        var pageSize = Math.Clamp(request.PageSize, 1, 100);
+
+        var items = await query
+            .Skip((page - 1) * pageSize)
+            .Take(pageSize)
             .ToListAsync();
+
+        return (items, totalCount);
     }
 
     public async Task<Form?> GetByIdAsync(int id)

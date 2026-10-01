@@ -2,13 +2,17 @@
 
 namespace FormManagementSystem.Services;
 
+using FormManagementSystem.DTOs.Common;
+
 public interface IFormService
 {
     Task<FormResponseDto> CreateAsync(CreateFormRequestDto dto);
 
-    Task<IEnumerable<FormResponseDto>> GetAllAsync();
+    Task<PaginatedResponseDto<FormResponseDto>> GetAllAsync(
+    PaginationRequestDto request);
 
-    Task<IEnumerable<FormResponseDto>> GetPublishedAsync();
+    Task<PaginatedResponseDto<FormResponseDto>> GetPublishedAsync(
+        PaginationRequestDto request);
 
     Task<FormResponseDto?> GetByIdAsync(int id);
 

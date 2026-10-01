@@ -1,4 +1,5 @@
 ﻿using FormManagementSystem.DTOs.FormResponse;
+using FormManagementSystem.DTOs.Common;
 
 namespace FormManagementSystem.Services;
 
@@ -10,11 +11,13 @@ public interface IFormResponseService
 
     Task<FormResponseResponseDto?> GetByIdAsync(int id);
 
-    Task<List<FormResponseResponseDto>> GetByUserIdAsync(int userId);
+    Task<PaginatedResponseDto<FormResponseResponseDto>> GetByUserIdAsync(
+    int userId,
+    PaginationRequestDto request);
 
-    Task<List<FormResponseResponseDto>> GetByFormIdAsync(
-    int formId,
-    string? search = null);
+    Task<PaginatedResponseDto<FormResponseResponseDto>> GetByFormIdAsync(
+        int formId,
+        PaginationRequestDto request);
 
-    
+
 }

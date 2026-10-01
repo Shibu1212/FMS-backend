@@ -1,6 +1,7 @@
 ﻿using FormManagementSystem.DTOs.Forms;
 using FormManagementSystem.Models;
 using FormManagementSystem.Repositories;
+using FormManagementSystem.DTOs.Common;
 
 namespace FormManagementSystem.Services;
 
@@ -36,32 +37,55 @@ public class FormService : IFormService
         return await MapToResponseDto(createdForm);
     }
 
-    public async Task<IEnumerable<FormResponseDto>> GetAllAsync()
+    public async Task<PaginatedResponseDto<FormResponseDto>> GetAllAsync(
+    PaginationRequestDto request)
     {
-        var forms = await _formRepository.GetAllAsync();
+        var result = await _formRepository.GetAllAsync(request);
 
-        var result = new List<FormResponseDto>();
+        var formDtos = new List<FormResponseDto>();
 
-        foreach (var form in forms)
+        foreach (var form in result.Items)
         {
-            result.Add(await MapToResponseDto(form));
+            formDtos.Add(
+                await MapToResponseDto(form));
         }
 
-        return result;
+        var page = Math.Max(request.Page, 1);
+        var pageSize = Math.Clamp(request.PageSize, 1, 100);
+
+        return new PaginatedResponseDto<FormResponseDto>
+        {
+            Items = formDtos,
+            Page = page,
+            PageSize = pageSize,
+            TotalCount = result.TotalCount
+        };
     }
 
-    public async Task<IEnumerable<FormResponseDto>> GetPublishedAsync()
+    public async Task<PaginatedResponseDto<FormResponseDto>> GetPublishedAsync(
+    PaginationRequestDto request)
     {
-        var forms = await _formRepository.GetPublishedAsync();
+        var result =
+            await _formRepository.GetPublishedAsync(request);
 
-        var result = new List<FormResponseDto>();
+        var formDtos = new List<FormResponseDto>();
 
-        foreach (var form in forms)
+        foreach (var form in result.Items)
         {
-            result.Add(await MapToResponseDto(form));
+            formDtos.Add(
+                await MapToResponseDto(form));
         }
 
-        return result;
+        var page = Math.Max(request.Page, 1);
+        var pageSize = Math.Clamp(request.PageSize, 1, 100);
+
+        return new PaginatedResponseDto<FormResponseDto>
+        {
+            Items = formDtos,
+            Page = page,
+            PageSize = pageSize,
+            TotalCount = result.TotalCount
+        };
     }
 
     public async Task<FormResponseDto?> GetByIdAsync(int id)
